@@ -9,8 +9,11 @@
 import UIKit
 import CoreData
 
-class ToDoListViewController: UITableViewController {
+class ToDoListViewController: UITableViewController, UISearchBarDelegate {
+    
+    @IBOutlet weak var mySearchBar: UISearchBar!
 
+    
     var itemArray = [Item]()
     
     let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent ("Items.plist")
@@ -21,6 +24,8 @@ class ToDoListViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        mySearchBar.delegate = self
     
        loadItems()
     }
@@ -59,6 +64,51 @@ class ToDoListViewController: UITableViewController {
         saveItems()
         
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    //MARK - Search bar delegate emthods
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        
+        let mySearch = mySearchBar.text!
+        
+        DispatchQueue.main.async {
+            
+            self.mySearchBar.resignFirstResponder()
+        }
+        
+        let request : NSFetchRequest <Item> = Item.fetchRequest()
+        
+        let predicate = NSPredicate(format: "name CONTAINS[cd] %@", mySearch)
+        
+        let sortDescriptor = NSSortDescriptor (key: "name", ascending: true)
+        
+        request.predicate = predicate
+        
+        request.sortDescriptors = [sortDescriptor]
+        
+        do {
+            itemArray = try context.fetch (request)
+        } catch {
+            print("Error during searching context \(error)")
+        }
+        
+        tableView.reloadData()
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        
+        if searchText.count == 0 {
+          
+            loadItems()
+            
+            tableView.reloadData()
+            
+            DispatchQueue.main.async {
+                    
+                self.mySearchBar.resignFirstResponder()
+            }
+        }
     }
     
     //MARK - add new items
@@ -105,7 +155,7 @@ class ToDoListViewController: UITableViewController {
             
         } catch {
             
-            print("Error saving context \(error)")
+            print("Error during saving context \(error)")
         }
         
         tableView.reloadData()
@@ -118,7 +168,7 @@ class ToDoListViewController: UITableViewController {
         do {
             itemArray = try context.fetch (request)
         } catch {
-            print("Error during reading contect \(error)")
+            print("Error during reading context \(error)")
         }
     }
 }

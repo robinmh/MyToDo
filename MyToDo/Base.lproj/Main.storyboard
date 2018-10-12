@@ -20,6 +20,9 @@
                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                             <textInputTraits key="textInputTraits"/>
+                            <connections>
+                                <outlet property="delegate" destination="laD-vj-3bs" id="EYw-AW-zfu"/>
+                            </connections>
                         </searchBar>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="ToDoItemCell" id="rhx-3e-Dlw">
@@ -45,7 +48,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="mySearchBar" destination="229-40-Mxs" id="rPR-5n-A4K"/>
+                        <outlet property="searchBar" destination="229-40-Mxs" id="aRS-l5-We4"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="BfH-K6-z6V" userLabel="First Responder" sceneMemberID="firstResponder"/>

@@ -9,10 +9,9 @@
 import UIKit
 import CoreData
 
-class ToDoListViewController: UITableViewController, UISearchBarDelegate {
-    
-    @IBOutlet weak var mySearchBar: UISearchBar!
+class ToDoListViewController: UITableViewController {
 
+    @IBOutlet weak var searchBar: UISearchBar!
     
     var itemArray = [Item]()
     
@@ -25,7 +24,7 @@ class ToDoListViewController: UITableViewController, UISearchBarDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        mySearchBar.delegate = self
+    //    searchBar.delegate = self done in StoryBoard
     
        loadItems()
     }
@@ -65,51 +64,9 @@ class ToDoListViewController: UITableViewController, UISearchBarDelegate {
         
         tableView.deselectRow(at: indexPath, animated: true)
     }
+
     
-    //MARK - Search bar delegate emthods
-    
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        
-        let mySearch = mySearchBar.text!
-        
-        DispatchQueue.main.async {
-            
-            self.mySearchBar.resignFirstResponder()
-        }
-        
-        let request : NSFetchRequest <Item> = Item.fetchRequest()
-        
-        let predicate = NSPredicate(format: "name CONTAINS[cd] %@", mySearch)
-        
-        let sortDescriptor = NSSortDescriptor (key: "name", ascending: true)
-        
-        request.predicate = predicate
-        
-        request.sortDescriptors = [sortDescriptor]
-        
-        do {
-            itemArray = try context.fetch (request)
-        } catch {
-            print("Error during searching context \(error)")
-        }
-        
-        tableView.reloadData()
-    }
-    
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        
-        if searchText.count == 0 {
-          
-            loadItems()
-            
-            tableView.reloadData()
-            
-            DispatchQueue.main.async {
-                    
-                self.mySearchBar.resignFirstResponder()
-            }
-        }
-    }
+  
     
     //MARK - add new items
     
@@ -161,14 +118,50 @@ class ToDoListViewController: UITableViewController, UISearchBarDelegate {
         tableView.reloadData()
     }
 
-    func loadItems() {
-        
-        let request: NSFetchRequest<Item> = Item.fetchRequest()
+    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest()) { //incude default value
 
         do {
             itemArray = try context.fetch (request)
         } catch {
             print("Error during reading context \(error)")
+        }
+        
+        tableView.reloadData()
+    }
+}
+
+ //MARK - Search bar delegate methods
+
+extension ToDoListViewController:  UISearchBarDelegate {
+
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        
+        let search = searchBar.text!
+        
+        DispatchQueue.main.async {
+            
+            self.searchBar.resignFirstResponder()
+        }
+        
+        let request : NSFetchRequest <Item> = Item.fetchRequest()
+        
+        request.predicate = NSPredicate(format: "name CONTAINS[cd] %@", search)
+        
+        request.sortDescriptors = [NSSortDescriptor (key: "name", ascending: true)]
+        
+        loadItems(with: request)
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        
+        if searchText.count == 0 {
+            
+            loadItems()
+            
+            DispatchQueue.main.async {
+                
+                self.searchBar.resignFirstResponder()
+            }
         }
     }
 }

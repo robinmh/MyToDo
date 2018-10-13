@@ -13,9 +13,17 @@ class ToDoListViewController: UITableViewController {
 
     @IBOutlet weak var searchBar: UISearchBar!
     
+    var selectedCategory : Category? {
+        didSet {
+            
+            print ("Item controller has a category")
+            loadItems()
+        }
+    }
+    
     var itemArray = [Item]()
     
-    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent ("Items.plist")
+   // let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent ("Items.plist")
     
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
@@ -26,7 +34,7 @@ class ToDoListViewController: UITableViewController {
         
     //    searchBar.delegate = self done in StoryBoard
     
-       loadItems()
+     //  loadItems()
     }
 
 //MARk - Tableview DataSource Methods
@@ -43,9 +51,9 @@ class ToDoListViewController: UITableViewController {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
         
-        cell.textLabel?.text = itemArray[indexPath.row].name
+        cell.textLabel?.text = itemArray[indexPath.row].title
         
-        cell.accessoryType = itemArray[indexPath.row].done ? .checkmark : .none
+  //      cell.accessoryType = itemArray[indexPath.row].done ? .checkmark : .none
        
         return cell
     }
@@ -82,10 +90,11 @@ class ToDoListViewController: UITableViewController {
             
             let item = Item(context: self.context)
             
-            item.name = textField.text!
+            item.title = textField.text!
             item.done = false
+            item.parentCategory = self.selectedCategory
             
-            if item.name != "" {
+            if item.title != "" {
            
                 self.itemArray.append(item)
             
@@ -117,9 +126,18 @@ class ToDoListViewController: UITableViewController {
         
         tableView.reloadData()
     }
-
-    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest()) { //incude default value
-
+    
+    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil) {
+        
+        if let extraPredicate = predicate {
+            
+            let categorypredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
+        
+            request.predicate = NSCompoundPredicate (andPredicateWithSubpredicates: [categorypredicate, extraPredicate])
+        } else {
+            request.predicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
+        }
+        
         do {
             itemArray = try context.fetch (request)
         } catch {
@@ -128,6 +146,7 @@ class ToDoListViewController: UITableViewController {
         
         tableView.reloadData()
     }
+
 }
 
  //MARK - Search bar delegate methods
@@ -145,11 +164,11 @@ extension ToDoListViewController:  UISearchBarDelegate {
         
         let request : NSFetchRequest <Item> = Item.fetchRequest()
         
-        request.predicate = NSPredicate(format: "name CONTAINS[cd] %@", search)
+        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", search)
         
-        request.sortDescriptors = [NSSortDescriptor (key: "name", ascending: true)]
+        request.sortDescriptors = [NSSortDescriptor (key: "title", ascending: true)]
         
-        loadItems(with: request)
+        loadItems(with: request, predicate: predicate)
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {

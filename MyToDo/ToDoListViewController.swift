@@ -7,34 +7,26 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class ToDoListViewController: UITableViewController {
 
     @IBOutlet weak var searchBar: UISearchBar!
     
+    let realm = try! Realm()
+    
     var selectedCategory : Category? {
         didSet {
-            
-            print ("Item controller has a category")
             loadItems()
         }
     }
     
-    var itemArray = [Item]()
-    
-   // let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent ("Items.plist")
-    
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
-    //let defaults = UserDefaults.standard
+    var items : Results<Item>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-    //    searchBar.delegate = self done in StoryBoard
-    
-     //  loadItems()
+        loadItems()
     }
 
 //MARk - Tableview DataSource Methods
@@ -44,16 +36,23 @@ class ToDoListViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return itemArray.count
+        return items.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
         
-        cell.textLabel?.text = itemArray[indexPath.row].title
+        if let item = items?[indexPath.row] {
+            
+            cell.textLabel?.text = item.title
         
-  //      cell.accessoryType = itemArray[indexPath.row].done ? .checkmark : .none
+            cell.accessoryType = item.done ? .checkmark : .none
+            
+        } else {
+            
+            cell.textLabel?.text = "No items defined"
+        }
        
         return cell
     }
@@ -62,19 +61,21 @@ class ToDoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        itemArray[indexPath.row].done  = !itemArray[indexPath.row].done
+         if let item = items?[indexPath.row] {
+            do {
+                try realm.write {
+                   item.done  = !item.done
+ //                   realm.delete(item)  //optional delete
+                }
+            } catch {
+                print ("Error saving done status \(error)")
+            }
+        }
         
-    //    context.delete(itemArray[indexPath.row])  //important: this is done first
-        
-    //    itemArray.remove (at: indexPath.row)
-        
-        saveItems()
+        tableView.reloadData()
         
         tableView.deselectRow(at: indexPath, animated: true)
     }
-
-    
-  
     
     //MARK - add new items
     
@@ -88,18 +89,25 @@ class ToDoListViewController: UITableViewController {
             
             // what will happen when the usee clicks the Add Item button
             
-            let item = Item(context: self.context)
+            if let category = self.selectedCategory {
+                
+                do {
+                    try self.realm.write {
+                        let item = Item()
             
-            item.title = textField.text!
-            item.done = false
-            item.parentCategory = self.selectedCategory
+                        item.title = textField.text!
+                
+                        if item.title != "" {
             
-            if item.title != "" {
-           
-                self.itemArray.append(item)
-            
-                self.saveItems()
+                            category.items.append(item) // add to category list
+                        }
+                    }
+                } catch {
+                    print ("Error saving item \(error)")
+                }
             }
+            
+            self.tableView.reloadData()
         }
         
         alert.addAction(action)
@@ -114,35 +122,9 @@ class ToDoListViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
     }
     
-    func saveItems () {
+    func loadItems() {
         
-        do {
-            try context.save()
-            
-        } catch {
-            
-            print("Error during saving context \(error)")
-        }
-        
-        tableView.reloadData()
-    }
-    
-    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil) {
-        
-        if let extraPredicate = predicate {
-            
-            let categorypredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
-        
-            request.predicate = NSCompoundPredicate (andPredicateWithSubpredicates: [categorypredicate, extraPredicate])
-        } else {
-            request.predicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
-        }
-        
-        do {
-            itemArray = try context.fetch (request)
-        } catch {
-            print("Error during reading context \(error)")
-        }
+        items = selectedCategory?.items.sorted (byKeyPath: "title", ascending: true)
         
         tableView.reloadData()
     }
@@ -157,18 +139,13 @@ extension ToDoListViewController:  UISearchBarDelegate {
         
         let search = searchBar.text!
         
+        items = items?.filter("title CONTAINS[cd] %@", search).sorted(byKeyPath: "title", ascending: true)
+        
         DispatchQueue.main.async {
             
             self.searchBar.resignFirstResponder()
         }
         
-        let request : NSFetchRequest <Item> = Item.fetchRequest()
-        
-        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", search)
-        
-        request.sortDescriptors = [NSSortDescriptor (key: "title", ascending: true)]
-        
-        loadItems(with: request, predicate: predicate)
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {

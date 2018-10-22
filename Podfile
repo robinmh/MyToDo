@@ -8,5 +8,6 @@ target 'MyToDo' do
   # Pods for MyToDo
 
 pod 'RealmSwift'
+pod 'SwipeCellKit'
 
 end

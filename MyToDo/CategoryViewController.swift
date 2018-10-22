@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import SwipeCellKit
 
 class CategoryViewController: UITableViewController {
     
@@ -19,6 +20,8 @@ class CategoryViewController: UITableViewController {
         super.viewDidLoad()
 
         loadCategories()
+
+        tableView.rowHeight = 80.0
     }
 
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
@@ -90,9 +93,11 @@ class CategoryViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath) as! SwipeTableViewCell
         
         cell.textLabel?.text = categories?[indexPath.row].name ?? "No categories added" //nil coalescing operator
+        
+        cell.delegate = self
         
         return cell
     }
@@ -116,5 +121,34 @@ class CategoryViewController: UITableViewController {
                 }
             }
         }
+    }
+}
+
+extension CategoryViewController: SwipeTableViewCellDelegate {
+    
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
+        
+        guard orientation == .right else { return nil}
+        
+        let deleteAction = SwipeAction (style: .destructive, title: "Delete") { action, indexPAth in
+            
+            if let category = self.categories?[indexPath.row] {
+                
+                do {
+                    try self.realm.write {
+
+                            self.realm.delete(category)
+                    }
+                } catch {
+                    print("Error deleteing category \(error)")
+                }
+                
+                tableView.reloadData()
+            }
+        }
+        
+        deleteAction.image = UIImage (named: "Delete_Icon")
+        
+        return [deleteAction]
     }
 }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0039B1D0217D321E00051CAA /* Delete_Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 0039B1CF217D321E00051CAA /* Delete_Icon.png */; };
 		009C48F72176B7AE00A28F15 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 009C48F62176B7AE00A28F15 /* Item.swift */; };
 		009C48FD2176B82200A28F15 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 009C48FC2176B82200A28F15 /* Category.swift */; };
 		009DB506216BED9900C01853 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 009DB505216BED9900C01853 /* AppDelegate.swift */; };
@@ -19,6 +20,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0039B1CF217D321E00051CAA /* Delete_Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Delete_Icon.png; sourceTree = "<group>"; };
 		009C48F62176B7AE00A28F15 /* Item.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
 		009C48FC2176B82200A28F15 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 		009DB502216BED9800C01853 /* MyToDo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyToDo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -82,6 +84,7 @@
 				009DB507216BED9900C01853 /* ToDoListViewController.swift */,
 				009DB509216BED9900C01853 /* Main.storyboard */,
 				009DB50C216BED9900C01853 /* Assets.xcassets */,
+				0039B1CF217D321E00051CAA /* Delete_Icon.png */,
 				009DB50E216BED9900C01853 /* LaunchScreen.storyboard */,
 				009DB511216BED9900C01853 /* Info.plist */,
 			);
@@ -166,6 +169,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				009DB510216BED9900C01853 /* LaunchScreen.storyboard in Resources */,
+				0039B1D0217D321E00051CAA /* Delete_Icon.png in Resources */,
 				009DB50D216BED9900C01853 /* Assets.xcassets in Resources */,
 				009DB50B216BED9900C01853 /* Main.storyboard in Resources */,
 			);
@@ -207,6 +211,7 @@
 				"${SRCROOT}/Pods/Target Support Files/Pods-MyToDo/Pods-MyToDo-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
 				"${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework",
+				"${BUILT_PRODUCTS_DIR}/SwipeCellKit/SwipeCellKit.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
@@ -214,6 +219,7 @@
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwipeCellKit.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
